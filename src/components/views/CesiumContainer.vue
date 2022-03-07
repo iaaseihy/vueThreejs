@@ -37,19 +37,6 @@ export default {
   methods: {
     initViewer() {
       // 天地图影像
-      var imageryProvider1 = new WebMapTileServiceImageryProvider({
-        url: 'http://t0.tianditu.com/img_w/wmts?service=wmts&request=GetTile&version=1.0.0&LAYER=img&tileMatrixSet=w&TileMatrix={TileMatrix}&TileRow={TileRow}&TileCol={TileCol}&style=default&format=tiles&tk=你的token',
-        layer: 'tdtBasicLayer',
-        style: 'default',
-        format: 'image/jpeg'
-      })
-      // 注记
-      var imageryProvider2 = new WebMapTileServiceImageryProvider({
-        url: 'http://t0.tianditu.com/cia_w/wmts?service=wmts&request=GetTile&version=1.0.0&LAYER=cia&tileMatrixSet=w&TileMatrix={TileMatrix}&TileRow={TileRow}&TileCol={TileCol}&style=default.jpg&tk=你的token',
-        layer: 'tdtAnnoLayer',
-        style: 'default',
-        format: 'image/jpeg'
-      })
       // 本地影像
       var imageryProvider = new UrlTemplateImageryProvider({
         url: LOCAL_IMG_URL,

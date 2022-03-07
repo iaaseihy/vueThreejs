@@ -24,8 +24,8 @@ export default {
   data() {
     return {
       viewer: null,
-      lon: -74.01296152309055, //128.055;
-      lat: 40.70524201566827, // 42.006
+      lon: 120.34448164198324, // -74.01296152309055;
+      lat: 31.16295978144941, // 40.70524201566827
       scene: null,
       camera: null,
       renderer: null,
@@ -44,7 +44,7 @@ export default {
   methods: {
     init() {
       var that = this
-    //   var GoogleMap = ImageryProviderWebExtendTool.createGoogleMapsByUrl(Cesium, { url: 'http://mt1.google.cn/vt/lyrs=s&hl=zh-CN&x={x}&y={y}&z={z}' })
+      //   var GoogleMap = ImageryProviderWebExtendTool.createGoogleMapsByUrl(Cesium, { url: 'http://mt1.google.cn/vt/lyrs=s&hl=zh-CN&x={x}&y={y}&z={z}' })
       var imageryProvider = new Cesium.UrlTemplateImageryProvider({
         url: LOCAL_IMG_URL,
         tilingScheme: new Cesium.WebMercatorTilingScheme(),
@@ -66,12 +66,66 @@ export default {
         fullscreenButton: true,
         isAdd: false
       })
-
-    //   var lat = 40.70524201566827 // 42.006;
-    //   var lon = -74.01296152309055 //128.055;
+      that.viewer.camera.setView({
+        destination: Cesium.Cartesian3.fromDegrees(that.lon, that.lat, 18000008)
+      })
+      //   var lat = 40.70524201566827 // 42.006;
+      //   var lon = -74.01296152309055 //128.055;
       that.viewer.scene.globe.depthTestAgainstTerrain = true
-      //取消双击事件
+      // 取消双击事件
       that.viewer.cesiumWidget.screenSpaceEventHandler.removeInputAction(Cesium.ScreenSpaceEventType.LEFT_DOUBLE_CLICK)
+      // 监听地图移动完成事件
+      // this.viewer.camera.moveEnd.addEventListener(this.onMoveendMap)
+      this.viewer.camera.moveEnd.addEventListener(this.getCurrentExtent)
+    },
+    // 获取当前相机视角内的图幅范围
+    getCurrentExtent() {
+      // 范围对象
+      var extent = {}
+
+      // 得到当前三维场景
+      var scene = this.viewer.scene
+
+      // 得到当前三维场景的椭球体
+      var ellipsoid = scene.globe.ellipsoid
+      var canvas = scene.canvas
+
+      // canvas左上角
+      var car3_lt = this.viewer.camera.pickEllipsoid(new Cesium.Cartesian2(0, 0), ellipsoid)
+
+      // canvas右下角
+      var car3_rb = this.viewer.camera.pickEllipsoid(new Cesium.Cartesian2(canvas.width, canvas.height), ellipsoid)
+
+      // 当canvas左上角和右下角全部在椭球体上
+      if (car3_lt && car3_rb) {
+        var carto_lt = ellipsoid.cartesianToCartographic(car3_lt)
+        var carto_rb = ellipsoid.cartesianToCartographic(car3_rb)
+        extent.xmin = Cesium.Math.toDegrees(carto_lt.longitude)
+        extent.ymax = Cesium.Math.toDegrees(carto_lt.latitude)
+        extent.xmax = Cesium.Math.toDegrees(carto_rb.longitude)
+        extent.ymin = Cesium.Math.toDegrees(carto_rb.latitude)
+      }
+
+      // 当canvas左上角不在但右下角在椭球体上
+      else if (!car3_lt && car3_rb) {
+        var car3_lt2 = null
+        var yIndex = 0
+        do {
+          // 这里每次10像素递加，一是10像素相差不大，二是为了提高程序运行效率
+          yIndex <= canvas.height ? (yIndex += 10) : canvas.height
+          car3_lt2 = this.viewer.camera.pickEllipsoid(new Cesium.Cartesian2(0, yIndex), ellipsoid)
+        } while (!car3_lt2)
+        var carto_lt2 = ellipsoid.cartesianToCartographic(car3_lt2)
+        var carto_rb2 = ellipsoid.cartesianToCartographic(car3_rb)
+        extent.xmin = Cesium.Math.toDegrees(carto_lt2.longitude)
+        extent.ymax = Cesium.Math.toDegrees(carto_lt2.latitude)
+        extent.xmax = Cesium.Math.toDegrees(carto_rb2.longitude)
+        extent.ymin = Cesium.Math.toDegrees(carto_rb2.latitude)
+      }
+
+      // 获取高度
+      extent.height = Math.ceil(this.viewer.camera.positionCartographic.height)
+      console.log('地图变化监听事件', extent, (extent.xmin + extent.xmax) / 2, (extent.ymax + extent.ymin) / 2)
     },
     /*
           添加雷达扫描线 地形遮挡开启   lon:-74.01296152309055 lat:40.70524201566827 height:129.14366696393927
@@ -156,7 +210,7 @@ export default {
       var _Cartesian3Center1 = Cesium.Cartographic.toCartesian(_CartographicCenter1)
       var _Cartesian4Center1 = new Cesium.Cartesian4(_Cartesian3Center1.x, _Cartesian3Center1.y, _Cartesian3Center1.z, 1)
 
-      var _CartographicCenter2 = new Cesium.Cartographic(cartographicCenter.longitude + Cesium.CesiumMath.toRadians(0.001), cartographicCenter.latitude, cartographicCenter.height)
+      var _CartographicCenter2 = new Cesium.Cartographic(cartographicCenter.longitude + Cesium.Math.toRadians(0.001), cartographicCenter.latitude, cartographicCenter.height)
       var _Cartesian3Center2 = Cesium.Cartographic.toCartesian(_CartographicCenter2)
       var _Cartesian4Center2 = new Cesium.Cartesian4(_Cartesian3Center2.x, _Cartesian3Center2.y, _Cartesian3Center2.z, 1)
       var _RotateQ = new Cesium.Quaternion()
@@ -203,7 +257,7 @@ export default {
             _scratchCartesian3Normal1.z = temp2.z - temp.z
 
             var tempTime = ((new Date().getTime() - _time) % duration) / duration
-            Cesium.Quaternion.fromAxisAngle(_scratchCartesian3Normal, tempTime * Cesium.CesiumMath.PI * 2, _RotateQ)
+            Cesium.Quaternion.fromAxisAngle(_scratchCartesian3Normal, tempTime * Cesium.Math.PI * 2, _RotateQ)
             Cesium.Matrix3.fromQuaternion(_RotateQ, _RotateM)
             Cesium.Matrix3.multiplyByVector(_RotateM, _scratchCartesian3Normal1, _scratchCartesian3Normal1)
             Cesium.Cartesian3.normalize(_scratchCartesian3Normal1, _scratchCartesian3Normal1)
@@ -221,7 +275,7 @@ export default {
       switch (value) {
         case 'position':
           that.viewer.camera.setView({
-            destination: Cesium.Cartesian3.fromDegrees(that.lon, that.lat, 300000)
+            destination: Cesium.Cartesian3.fromDegrees(that.lon, that.lat, 10000)
           })
           break
         case 'add':
@@ -233,7 +287,7 @@ export default {
                 color: Cesium.Color.RED
               }
             })
-            var CartographicCenter = new Cesium.Cartographic(Cesium.CesiumMath.toRadians(that.lon), Cesium.CesiumMath.toRadians(that.lat), 0)
+            var CartographicCenter = new Cesium.Cartographic(Cesium.Math.toRadians(that.lon), Cesium.Math.toRadians(that.lat), 0)
             var scanColor = new Cesium.Color(1.0, 0.0, 0.0, 1)
             this.AddRadarScanPostStage(that.viewer, CartographicCenter, 1000, scanColor, 4000)
             that.isAdd = true
