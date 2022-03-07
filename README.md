@@ -31,10 +31,6 @@ npm run build / cnpm run build / yarn build
 
 The default template is cesium 1.84. When you need to install cesium 1.84 +, it is recommended to use the **yarn** installation
 
-## 你可能感兴趣的存储库 (Repositories you may be interested)
-
-[cesium-vue-electron](https://github.com/ShareQiu1994/cesium-vue-electron)
-
 ## License
 
 [MIT licensed](LICENSE).
