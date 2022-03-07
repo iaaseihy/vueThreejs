@@ -125,6 +125,12 @@ export default {
 
       // 获取高度
       extent.height = Math.ceil(this.viewer.camera.positionCartographic.height)
+      // 获取当前缩放的地图层级
+      let level = 0
+      if (this.viewer.scene.globe._surface._tilesToRender.length) {
+        level = this.viewer.scene.globe._surface._tilesToRender[0].level
+        console.log('当前地图层级=======', level)
+      }
       console.log('地图变化监听事件', extent, (extent.xmin + extent.xmax) / 2, (extent.ymax + extent.ymin) / 2)
     },
     /*
