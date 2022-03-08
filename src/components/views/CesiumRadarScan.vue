@@ -52,8 +52,14 @@ export default {
         minimumLevel: 0,
         maximumLevel: 19
       })
+
+      // 加载arcgis数据——ArcGisMapServerImageryProvider
+      var imageryProviderArcGIS = new Cesium.ArcGisMapServerImageryProvider({
+        url: 'http://atlasmaps.esri.com/arcgis/rest/services/Esri/USA_Population_Density/MapServer',
+        enablePickFeatures: false
+      })
       that.viewer = new Cesium.Viewer('cesiumContainer', {
-        imageryProvider: imageryProvider,
+        imageryProvider: imageryProviderArcGIS,
         creditContainer: 'creditContainer',
         selectionIndicator: true,
         animation: false,
@@ -72,6 +78,7 @@ export default {
       //   var lat = 40.70524201566827 // 42.006;
       //   var lon = -74.01296152309055 //128.055;
       that.viewer.scene.globe.depthTestAgainstTerrain = true
+      // that.viewer.scene.debugShowFramesPerSecond = true // 显示帧率
       // 取消双击事件
       that.viewer.cesiumWidget.screenSpaceEventHandler.removeInputAction(Cesium.ScreenSpaceEventType.LEFT_DOUBLE_CLICK)
       // 监听地图移动完成事件

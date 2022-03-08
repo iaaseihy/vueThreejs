@@ -48,7 +48,7 @@ export default {
       })
       var terrainProvider = new CesiumTerrainProvider({
         url: LOCAL_TERRAIN_URL,
-        requestWaterMask: true //请求水波纹效果
+        requestWaterMask: true // 请求水波纹效果
       })
       const viewer = new Viewer('cesiumContainer', {
         terrainExaggeration: 0.95,
@@ -66,7 +66,7 @@ export default {
         infoBox: false
       })
 
-      //用于渲染星空的SkyBox对象
+      // 用于渲染星空的SkyBox对象
       viewer.scene.skyBox = new SkyBox({
         sources: {
           positiveX: positiveX,
@@ -79,8 +79,9 @@ export default {
       })
       viewer._cesiumWidget._creditContainer.style.display = 'none'
       viewer.scene.globe.showGroundAtmosphere = false
+      // viewer.scene.debugShowFramesPerSecond = true // 显示帧率
       // viewer.scene.globe.baseColor = Color.BLACK
-      viewer.scene.globe.baseColor = new Color(1, 1, 1, 0) //修改地球颜色
+      viewer.scene.globe.baseColor = new Color(1, 1, 1, 0) // 修改地球颜色
       // viewer.scene.primitives.add(createOsmBuildings())
       // viewer.scene.camera.flyTo({
       //   destination: Cartesian3.fromDegrees(-74.019, 40.6912, 750)
