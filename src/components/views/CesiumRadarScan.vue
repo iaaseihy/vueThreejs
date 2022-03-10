@@ -19,14 +19,15 @@ import { LOCAL_IMG_URL } from '../commonJS/config'
 import 'cesium/Build/Cesium/Widgets/widgets.css'
 // import * as Cesium from '../../cesium/Cesium1.48/Cesium/1-2ImageryProvider-WebExtend.js'
 // import * as Cesium from '../../cesium/Cesium1.48/Cesium/Widgets/widgets.css'
+var viewer, scene // scene,viewer 用全局变量，不放属性data里面，避免由于vue的双向绑定机制劫持数据导致数据量大的时候页面卡顿
 export default {
   name: 'CesiumRadarScan',
   data() {
     return {
-      viewer: null,
+      // viewer: null,
       lon: 120.34448164198324, // -74.01296152309055;
       lat: 31.16295978144941, // 40.70524201566827
-      scene: null,
+      // scene: null,
       camera: null,
       renderer: null,
       trackballControls: null,
@@ -53,13 +54,13 @@ export default {
         maximumLevel: 19
       })
 
-      // 加载arcgis数据——ArcGisMapServerImageryProvider
-      var imageryProviderArcGIS = new Cesium.ArcGisMapServerImageryProvider({
-        url: 'http://atlasmaps.esri.com/arcgis/rest/services/Esri/USA_Population_Density/MapServer',
-        enablePickFeatures: false
-      })
-      that.viewer = new Cesium.Viewer('cesiumContainer', {
-        imageryProvider: imageryProviderArcGIS,
+      // // 加载arcgis数据——ArcGisMapServerImageryProvider
+      // var imageryProviderArcGIS = new Cesium.ArcGisMapServerImageryProvider({
+      //   url: 'http://atlasmaps.esri.com/arcgis/rest/services/Esri/USA_Population_Density/MapServer',
+      //   enablePickFeatures: false
+      // })
+      viewer = new Cesium.Viewer('cesiumContainer', {
+        imageryProvider: imageryProvider,
         creditContainer: 'creditContainer',
         selectionIndicator: true,
         animation: false,
@@ -72,18 +73,18 @@ export default {
         fullscreenButton: true,
         isAdd: false
       })
-      that.viewer.camera.setView({
+      viewer.camera.setView({
         destination: Cesium.Cartesian3.fromDegrees(that.lon, that.lat, 18000008)
       })
       //   var lat = 40.70524201566827 // 42.006;
       //   var lon = -74.01296152309055 //128.055;
-      that.viewer.scene.globe.depthTestAgainstTerrain = true
-      // that.viewer.scene.debugShowFramesPerSecond = true // 显示帧率
+      viewer.scene.globe.depthTestAgainstTerrain = true
+      viewer.scene.debugShowFramesPerSecond = true // 显示帧率
       // 取消双击事件
-      that.viewer.cesiumWidget.screenSpaceEventHandler.removeInputAction(Cesium.ScreenSpaceEventType.LEFT_DOUBLE_CLICK)
+      viewer.cesiumWidget.screenSpaceEventHandler.removeInputAction(Cesium.ScreenSpaceEventType.LEFT_DOUBLE_CLICK)
       // 监听地图移动完成事件
-      // this.viewer.camera.moveEnd.addEventListener(this.onMoveendMap)
-      this.viewer.camera.moveEnd.addEventListener(this.getCurrentExtent)
+      // viewer.camera.moveEnd.addEventListener(this.onMoveendMap)
+      viewer.camera.moveEnd.addEventListener(this.getCurrentExtent)
     },
     // 获取当前相机视角内的图幅范围
     getCurrentExtent() {
@@ -91,17 +92,17 @@ export default {
       var extent = {}
 
       // 得到当前三维场景
-      var scene = this.viewer.scene
+      var scene = viewer.scene
 
       // 得到当前三维场景的椭球体
       var ellipsoid = scene.globe.ellipsoid
       var canvas = scene.canvas
 
       // canvas左上角
-      var car3_lt = this.viewer.camera.pickEllipsoid(new Cesium.Cartesian2(0, 0), ellipsoid)
+      var car3_lt = viewer.camera.pickEllipsoid(new Cesium.Cartesian2(0, 0), ellipsoid)
 
       // canvas右下角
-      var car3_rb = this.viewer.camera.pickEllipsoid(new Cesium.Cartesian2(canvas.width, canvas.height), ellipsoid)
+      var car3_rb = viewer.camera.pickEllipsoid(new Cesium.Cartesian2(canvas.width, canvas.height), ellipsoid)
 
       // 当canvas左上角和右下角全部在椭球体上
       if (car3_lt && car3_rb) {
@@ -120,7 +121,7 @@ export default {
         do {
           // 这里每次10像素递加，一是10像素相差不大，二是为了提高程序运行效率
           yIndex <= canvas.height ? (yIndex += 10) : canvas.height
-          car3_lt2 = this.viewer.camera.pickEllipsoid(new Cesium.Cartesian2(0, yIndex), ellipsoid)
+          car3_lt2 = viewer.camera.pickEllipsoid(new Cesium.Cartesian2(0, yIndex), ellipsoid)
         } while (!car3_lt2)
         var carto_lt2 = ellipsoid.cartesianToCartographic(car3_lt2)
         var carto_rb2 = ellipsoid.cartesianToCartographic(car3_rb)
@@ -131,11 +132,11 @@ export default {
       }
 
       // 获取高度
-      extent.height = Math.ceil(this.viewer.camera.positionCartographic.height)
+      extent.height = Math.ceil(viewer.camera.positionCartographic.height)
       // 获取当前缩放的地图层级
       let level = 0
-      if (this.viewer.scene.globe._surface._tilesToRender.length) {
-        level = this.viewer.scene.globe._surface._tilesToRender[0].level
+      if (viewer.scene.globe._surface._tilesToRender.length) {
+        level = viewer.scene.globe._surface._tilesToRender[0].level
         console.log('当前地图层级=======', level)
       }
       console.log('地图变化监听事件', extent, (extent.xmin + extent.xmax) / 2, (extent.ymax + extent.ymin) / 2)
@@ -287,13 +288,13 @@ export default {
       var that = this
       switch (value) {
         case 'position':
-          that.viewer.camera.setView({
+          viewer.camera.setView({
             destination: Cesium.Cartesian3.fromDegrees(that.lon, that.lat, 10000)
           })
           break
         case 'add':
           if (!that.isAdd) {
-            that.viewer.entities.add({
+            viewer.entities.add({
               position: Cesium.Cartesian3.fromDegrees(that.lon, that.lat),
               point: {
                 pixelSize: 10,
@@ -302,13 +303,13 @@ export default {
             })
             var CartographicCenter = new Cesium.Cartographic(Cesium.Math.toRadians(that.lon), Cesium.Math.toRadians(that.lat), 0)
             var scanColor = new Cesium.Color(1.0, 0.0, 0.0, 1)
-            this.AddRadarScanPostStage(that.viewer, CartographicCenter, 1000, scanColor, 4000)
+            this.AddRadarScanPostStage(viewer, CartographicCenter, 1000, scanColor, 4000)
             that.isAdd = true
           }
           break
         case 'del':
           if (that.isAdd) {
-            that.viewer.scene.postProcessStages.removeAll()
+            viewer.scene.postProcessStages.removeAll()
             that.isAdd = false
           }
           break
