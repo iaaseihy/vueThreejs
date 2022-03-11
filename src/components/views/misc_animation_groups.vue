@@ -9,7 +9,7 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 // import { OrbitControls } from './commonJS/OrbitControls'
 import { FontLoader } from 'three/examples/jsm/loaders/FontLoader'
 import { TextGeometry } from 'three/examples/jsm/geometries/TextGeometry'
-var scene, mesh // scene,mesh 两个用全局变量，不放属性里面就可以了，具体原因不知?????????
+var scene, mesh, textureLine // scene,mesh 两个用全局变量，不放属性里面就可以了，具体原因不知?????????
 export default {
   name: 'AnimationGroup',
   data() {
@@ -182,6 +182,33 @@ export default {
 
       that.clock = new THREE.Clock()
 
+      /**
+       * 添加道路流光特效
+       */
+      textureLine = new THREE.TextureLoader().load('static/texture/line.png')
+      textureLine.wrapS = textureLine.wrapT = THREE.RepeatWrapping // 每个都重复
+      textureLine.repeat.set(1, 1)
+      textureLine.needsUpdate = true
+
+      let materialine = new THREE.MeshBasicMaterial({
+        map: textureLine,
+        side: THREE.BackSide,
+        transparent: true
+      })
+
+      // 创建顶点数组
+      let points = [new THREE.Vector3(0, 0, 0), new THREE.Vector3(10, 0, 0), new THREE.Vector3(10, 0, 10), new THREE.Vector3(0, 0, 10)]
+      // let points = [new THREE.Vector3(0, 0, 0), new THREE.Vector3(0, 0, 10), new THREE.Vector3(0, 0, 20), new THREE.Vector3(0, 0, 40)]
+      // CatmullRomCurve3创建一条平滑的三维样条曲线
+      let curve = new THREE.CatmullRomCurve3(points) // 曲线路径
+
+      // 创建管道
+      let tubeGeometry = new THREE.TubeGeometry(curve, 80, 0.1)
+
+      let meshLine = new THREE.Mesh(tubeGeometry, materialine)
+
+      scene.add(meshLine)
+
       //
       // 添加辅助线
       var axesHelper = new THREE.AxesHelper(100)
@@ -205,7 +232,8 @@ export default {
     },
 
     animate() {
-      // this.renderer.render(this.scene, this.camera)
+      // 线条流动
+      if (textureLine) textureLine.offset.x -= 0.01
       requestAnimationFrame(this.animate)
       this.render()
     },
