@@ -33,9 +33,9 @@ const routes = [
     component: AnimationBinding
   },
   {
-    path: '/heatmap',
-    name: 'heatMap',
-    component: () => import('../components/views/heatMap.vue')
+    path: '/heatmapshader',
+    name: 'heatmapShader',
+    component: () => import('../components/views/heatMap_shader.vue')
   }
 ];
 
