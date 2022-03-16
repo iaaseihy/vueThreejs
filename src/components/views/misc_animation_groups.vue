@@ -12,6 +12,7 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 // import { OrbitControls } from './commonJS/OrbitControls'
 import { FontLoader } from 'three/examples/jsm/loaders/FontLoader'
 import { TextGeometry } from 'three/examples/jsm/geometries/TextGeometry'
+import { GUI } from 'dat.gui'
 var scene, mesh, textureLine, ctx, canvas // scene,mesh 两个用全局变量，不放属性里面就可以了，具体原因不知?????????
 const segments = 30
 const w = 256
@@ -133,17 +134,23 @@ export default {
       })
       const material = new THREE.MeshBasicMaterial({ map: texture, transparent: true })
 
+      const meshCollection = []
       for (let i = 0; i < 5; i++) {
         for (let j = 0; j < 5; j++) {
-          const mesh = new THREE.Mesh(geometry, material)
+          var mesh = new THREE.Mesh(geometry, material)
 
           mesh.position.x = 32 - 16 * i
           mesh.position.y = 0
           mesh.position.z = 32 - 16 * j
-
           scene.add(mesh)
           animationGroup.add(mesh)
+          meshCollection.push(mesh)
         }
+      }
+      console.log(meshCollection)
+      const gui = new GUI()
+      for (let item = 0; item < meshCollection.length; item++) {
+        this.makeXYZGUI(gui, meshCollection[item].position, 'position +' + item + 1)
       }
       // create some keyframe tracks
       // 创建一个x坐标为1,y坐标为0的向量,z坐标为0的向量,no arguments; will be initialised to (0, 0, 0)
@@ -293,6 +300,14 @@ export default {
       that.renderer.render(scene, that.camera)
 
       that.stats.update()
+    },
+
+    makeXYZGUI(gui, vector3, name) {
+      const folder = gui.addFolder(name)
+      folder.add(vector3, 'x', -1000, 1000, 0.01)
+      folder.add(vector3, 'y', 0, 10, 0.1)
+      folder.add(vector3, 'z', -1000, 1000, 0.01)
+      folder.open()
     },
 
     // 随机给出温度值 储存在2维数组
