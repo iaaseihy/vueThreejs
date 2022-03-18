@@ -36,6 +36,11 @@ const routes = [
     path: '/heatmapshader',
     name: 'heatmapShader',
     component: () => import('../components/views/heatMap_shader.vue')
+  },
+  {
+    path: '/arcgisserver',
+    name: 'ArcGisServerLoader',
+    component: () => import('../components/views/ArcgisServerLoader.vue')
   }
 ];
 

@@ -100,7 +100,7 @@ export default {
       scene.add(that.spotLight)
 
       //
-      var textLoad = new FontLoader().load('static/font/Source Han Sans CN Normal_Regular.json', function (font) {
+      const textLoad = new FontLoader().load('static/font/Source Han Sans CN Normal_Regular.json', function (font) {
         var txtGeo = new TextGeometry('THREE.JS字体！', {
           font: font,
           size: 0.8, // Float。字体大小，默认值为100
@@ -147,10 +147,10 @@ export default {
           meshCollection.push(mesh)
         }
       }
-      console.log(meshCollection)
+      console.log(meshCollection, 'meshCollection')
       const gui = new GUI()
       for (let item = 0; item < meshCollection.length; item++) {
-        this.makeXYZGUI(gui, meshCollection[item].position, 'position +' + item + 1)
+        this.makeXYZGUI(gui, meshCollection[item].position, 'position' + (parseInt(item) + 1))
       }
       // create some keyframe tracks
       // 创建一个x坐标为1,y坐标为0的向量,z坐标为0的向量,no arguments; will be initialised to (0, 0, 0)
@@ -199,66 +199,66 @@ export default {
        * 添加道路流光特效
        */
       textureLine = new THREE.TextureLoader().load('static/texture/line.png')
-      textureLine.wrapS = textureLine.wrapT = THREE.RepeatWrapping // 每个都重复
-      textureLine.repeat.set(1, 1)
+      textureLine.wrapS = textureLine.wrapT = THREE.RepeatWrapping // // 贴图的重复方式，每个都重复
+      textureLine.repeat.set(1, 1) // 纹理在整个表面上重复多少次，在每个方向U和V上。
       textureLine.needsUpdate = true
 
-      let materialine = new THREE.MeshBasicMaterial({
+      const materialine = new THREE.MeshBasicMaterial({
         map: textureLine,
         side: THREE.BackSide,
         transparent: true
       })
 
       // 创建顶点数组
-      let points = [new THREE.Vector3(0, 0, 0), new THREE.Vector3(10, 0, 0), new THREE.Vector3(10, 0, 10), new THREE.Vector3(0, 0, 10)]
+      const points = [new THREE.Vector3(0, 0, 0), new THREE.Vector3(10, 0, 0), new THREE.Vector3(10, 0, 10), new THREE.Vector3(0, 0, 10)]
       // let points = [new THREE.Vector3(0, 0, 0), new THREE.Vector3(0, 0, 10), new THREE.Vector3(0, 0, 20), new THREE.Vector3(0, 0, 40)]
       // CatmullRomCurve3创建一条平滑的三维样条曲线
-      let curve = new THREE.CatmullRomCurve3(points) // 曲线路径
+      const curve = new THREE.CatmullRomCurve3(points) // 曲线路径
 
       // 创建管道
-      let tubeGeometry = new THREE.TubeGeometry(curve, 80, 0.1)
+      const tubeGeometry = new THREE.TubeGeometry(curve, 80, 0.1)
 
-      let meshLine = new THREE.Mesh(tubeGeometry, materialine)
+      const meshLine = new THREE.Mesh(tubeGeometry, materialine)
 
       scene.add(meshLine)
 
-      // 添加热力图
-      var heatMapGeo = new THREE.PlaneBufferGeometry(1500, 1500)
+      //   // 添加热力图
+      //   var heatMapGeo = new THREE.PlaneBufferGeometry(1500, 1500)
 
-      var heatMapMaterial = new THREE.ShaderMaterial({
-        transparent: true,
-        // vertexShader: document.getElementById('vertexshader').textContent,
-        // fragmentShader: document.getElementById('fragmentshader').textContent,
-        vertexShader: `varying vec2 vUv;
-    void main() {
-      vUv = uv;
-      gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-    }`,
-        fragmentShader: `#ifdef GL_ES
-    precision highp float;
-    #endif
-    varying vec2 vUv;
-    uniform sampler2D alphaScaleMap;
-    uniform sampler2D paletteMap;
-    void main() {
-      vec4 alphaColor = texture2D(alphaScaleMap, vUv);
-      vec4 color = texture2D(paletteMap, vec2(alphaColor.a, 0.0));
-      gl_FragColor = vec4(color.r, color.g, color.b, alphaColor.a);
-    }`,
-        uniforms: {
-          alphaScaleMap: {
-            type: 't',
-            value: this.getAlphaScaleMap(w, h)
-          },
-          paletteMap: {
-            type: 't',
-            value: this.getPaletteMap()
-          }
-        }
-      })
+      //   var heatMapMaterial = new THREE.ShaderMaterial({
+      //     transparent: true,
+      //     // vertexShader: document.getElementById('vertexshader').textContent,
+      //     // fragmentShader: document.getElementById('fragmentshader').textContent,
+      //     vertexShader: `varying vec2 vUv;
+      // void main() {
+      //   vUv = uv;
+      //   gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+      // }`,
+      //     fragmentShader: `#ifdef GL_ES
+      // precision highp float;
+      // #endif
+      // varying vec2 vUv;
+      // uniform sampler2D alphaScaleMap;
+      // uniform sampler2D paletteMap;
+      // void main() {
+      //   vec4 alphaColor = texture2D(alphaScaleMap, vUv);
+      //   vec4 color = texture2D(paletteMap, vec2(alphaColor.a, 0.0));
+      //   gl_FragColor = vec4(color.r, color.g, color.b, alphaColor.a);
+      // }`,
+      //     uniforms: {
+      //       alphaScaleMap: {
+      //         type: 't',
+      //         value: this.getAlphaScaleMap(w, h)
+      //       },
+      //       paletteMap: {
+      //         type: 't',
+      //         value: this.getPaletteMap()
+      //       }
+      //     }
+      //   })
 
-      var heatMapPlane = new THREE.Mesh(heatMapGeo, heatMapMaterial)
-      scene.add(heatMapPlane)
+      //   var heatMapPlane = new THREE.Mesh(heatMapGeo, heatMapMaterial)
+      //   scene.add(heatMapPlane)
 
       //
       // 添加辅助线
@@ -312,7 +312,7 @@ export default {
 
     // 随机给出温度值 储存在2维数组
     getTemperature() {
-      let temperatureArray = new Array()
+      const temperatureArray = new Array()
       for (let i = 0; i < segments; i++) {
         temperatureArray[i] = parseInt(Math.random() * 25 + 10)
       }
@@ -324,7 +324,7 @@ export default {
       radius = parseInt(radius * weight)
 
       // 创建圆设置填充色
-      let rGradient = context.createRadialGradient(x, y, 0, x, y, radius)
+      const rGradient = context.createRadialGradient(x, y, 0, x, y, radius)
       rGradient.addColorStop(0, 'rgba(255, 0, 0, 1)')
       rGradient.addColorStop(1, 'rgba(0, 255, 0, 0)')
       context.fillStyle = rGradient
@@ -339,7 +339,7 @@ export default {
     },
     getPaletteMap() {
       // 颜色条的颜色分布
-      let colorStops = {
+      const colorStops = {
         1.0: '#f00',
         0.8: '#e2fa00',
         0.6: '#33f900',
@@ -361,7 +361,7 @@ export default {
       //   let ctx = paletteCanvas.getContext('2d')
       ctx = paletteCanvas.getContext('2d')
       // 创建线性渐变色
-      let linearGradient = ctx.createLinearGradient(0, 0, width, 0)
+      const linearGradient = ctx.createLinearGradient(0, 0, width, 0)
       for (const key in colorStops) {
         linearGradient.addColorStop(key, colorStops[key])
       }
@@ -372,7 +372,7 @@ export default {
 
       document.body.appendChild(paletteCanvas)
 
-      let paletteTexture = new THREE.Texture(paletteCanvas)
+      const paletteTexture = new THREE.Texture(paletteCanvas)
       paletteTexture.minFilter = THREE.NearestFilter
       paletteTexture.needsUpdate = true
 
@@ -386,15 +386,15 @@ export default {
       canvas.height = height
 
       //   let context = canvas.getcontext('2d')
-      let context = canvas.getContext('2d')
+      const context = canvas.getContext('2d')
 
       // 随机生成温度
-      let tenperature = this.getTemperature()
+      const tenperature = this.getTemperature()
 
       // 绘制透明度阶梯图
       for (let i = 0; i < segments; i++) {
         // 计算出当前温度占标准温度的权值
-        let weight = tenperature[i] / 35
+        const weight = tenperature[i] / 35
 
         this.drawCircular(context, {
           x: Math.random() * w,
@@ -404,7 +404,7 @@ export default {
         })
       }
 
-      let tex = new THREE.Texture(canvas)
+      const tex = new THREE.Texture(canvas)
       tex.minFilter = THREE.NearestFilter
       tex.needsUpdate = true
       return tex
